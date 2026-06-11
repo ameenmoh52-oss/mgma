@@ -1,725 +1,471 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>مجمع شهداء التربية النموذجي</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-  <link rel="manifest" href="/MGMA/manifest.json">
-  <link rel="icon" href="favicon.ico">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة نتائج الطلاب - Google Sheets</title>
+    
+    <!-- Meta Tags for PWA -->
+    <meta name="theme-color" content="#667eea"/>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="نتائج الطلاب">
+    
+    <!-- أيقونات PWA (المسارات معدلة) -->
+    <link rel="icon" type="image/png" href="/icon-192x192.png">
+    <link rel="shortcut icon" href="/icon-192x192.png">
+    <link rel="apple-touch-icon" href="/icon-192x192.png">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- SheetJS و jsQR -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 
-  <!-- OneSignal SDK -->
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(function(OneSignal) {
-          OneSignal.init({
-              appId: "adbcf77b-5fb0-4c24-b23c-25f052b00853",
-              serviceWorkerPath: "/OneSignalSDKWorker.js",
-              serviceWorkerUpdaterPath: "/OneSignalSDKUpdaterWorker.js"
-          });
-      });
-  </script>
-
- <style>
-    :root {
-      --primary-color: #004080;
-      --secondary-color: #ffc107;
-      --accent-color: #28a745;
-      --danger-color: #dc3545;
-      --light-color: #f8f9fa;
-      --dark-color: #343a40;
-      --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      --card-hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-    }
-    
-    body {
-      font-family: 'Tahoma', 'Segoe UI', sans-serif;
-      background-color: #f5f7fa;
-      color: #333;
-      line-height: 1.6;
-    }
-    
-    .school-header {
-      background: linear-gradient(135deg, var(--primary-color), #0066cc);
-      color: white;
-      padding: 1.5rem 0;
-      box-shadow: 0 4px 12px rgba(0, 64, 128, 0.15);
-    }
-    
-    .school-header h1 {
-      font-weight: 700;
-      font-size: 1.8rem;
-      margin-bottom: 0;
-    }
-    
-    .school-logo {
-      height: 70px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
-    
-    .section-card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: var(--card-shadow);
-      padding: 2rem;
-      margin-bottom: 2rem;
-      transition: all 0.3s ease;
-      border-top: 4px solid var(--primary-color);
-    }
-    
-    .section-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--card-hover-shadow);
-    }
-    
-    .section-title {
-      color: var(--primary-color);
-      font-weight: 700;
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 2px solid #f0f0f0;
-      position: relative;
-    }
-    
-    .section-title:after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      right: 0;
-      width: 80px;
-      height: 2px;
-      background: var(--secondary-color);
-    }
-    
-    .section-img img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-      border: 3px solid var(--primary-color);
-    }
-    
-    .btn-custom {
-      padding: 0.75rem 1.5rem;
-      font-weight: 600;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      color: white; /* إضافة لون الخط الأبيض */
-    }
-    
-    .btn-custom i {
-      font-size: 1.1rem;
-    }
-    
-    .btn-primary-custom {
-      background: var(--primary-color);
-      border-color: var(--primary-color);
-      color: white; /* إضافة لون الخط الأبيض */
-    }
-    
-    .btn-primary-custom:hover {
-      background: #003366;
-      border-color: #003366;
-      transform: translateY(-2px);
-      color: white; /* الحفاظ على اللون الأبيض عند التحويم */
-    }
-    
-    .btn-success-custom {
-      background: var(--accent-color);
-      border-color: var(--accent-color);
-      color: white; /* إضافة لون الخط الأبيض */
-    }
-    
-    .btn-success-custom:hover {
-      background: #218838;
-      border-color: #218838;
-      transform: translateY(-2px);
-      color: white; /* الحفاظ على اللون الأبيض عند التحويم */
-    }
-    
-    .btn-warning-custom {
-      background: var(--secondary-color);
-      border-color: var(--secondary-color);
-      color: white; /* تغيير لون الخط إلى الأبيض بدلاً من #212529 */
-    }
-    
-    .btn-warning-custom:hover {
-      background: #e0a800;
-      border-color: #e0a800;
-      color: white; /* الحفاظ على اللون الأبيض عند التحويم */
-      transform: translateY(-2px);
-    }
-    
-    .btn-danger-custom {
-      background: var(--danger-color);
-      border-color: var(--danger-color);
-      color: white; /* إضافة لون الخط الأبيض */
-    }
-    
-    .btn-danger-custom:hover {
-      background: #c82333;
-      border-color: #c82333;
-      transform: translateY(-2px);
-      color: white; /* الحفاظ على اللون الأبيض عند التحويم */
-    }
-    
-    .grade-btn {
-      height: 100%;
-      padding: 1rem 0.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      font-weight: 600;
-      border-radius: 10px;
-      color: white; /* إضافة لون الخط الأبيض */
-      text-decoration: none; /* إزالة خط التسطير من الروابط */
-    }
-    
-    .grade-btn:hover {
-      color: white; /* الحفاظ على اللون الأبيض عند التحويم */
-      text-decoration: none; /* إزالة خط التسطير من الروابط عند التحويم */
-    }
-    
-    .grade-btn i {
-      font-size: 1.5rem;
-    }
-    
-    #notifyBtn {
-      position: fixed;
-      top: 15px;
-      left: 70px;
-      z-index: 9999;
-      background-color: var(--secondary-color);
-      color: white; /* تغيير لون النص إلى الأبيض */
-      border: none;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      font-size: 24px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    #notifyBtn:hover {
-      background-color: #e0a800;
-      transform: scale(1.1);
-      color: white; /* الحفاظ على اللون الأبيض عند التحويم */
-    }
-    
-    #installBtn {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      z-index: 9999;
-      background: linear-gradient(135deg, #6f42c1, #8a63d2);
-      color: white; /* الحفاظ على اللون الأبيض */
-      border: none;
-      border-radius: 50px;
-      padding: 1rem 1.5rem;
-      font-weight: 700;
-      font-size: 1rem;
-      box-shadow: 0 6px 20px rgba(111, 66, 193, 0.4);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    #installBtn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(111, 66, 193, 0.6);
-      background: linear-gradient(135deg, #5a3796, #7a52c4);
-      color: white; /* الحفاظ على اللون الأبيض عند التحويم */
-    }
-    
-    #installBtn.hidden {
-      display: none !important;
-    }
-    
-    .rules-list {
-      background: #f8f9fa;
-      padding: 1.5rem;
-      border-radius: 10px;
-      border-right: 4px solid var(--secondary-color);
-    }
-    
-    .rules-list li {
-      margin-bottom: 0.75rem;
-      padding-right: 0.5rem;
-    }
-    
-    .map-container {
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-    
-    footer {
-      background: var(--dark-color);
-      color: white;
-      padding: 2rem 0;
-      margin-top: 3rem;
-    }
-    
-    @media (max-width: 768px) {
-      .school-header h1 {
-        font-size: 1.4rem;
-      }
-      
-      .school-logo {
-        height: 50px;
-      }
-      
-      .section-card {
-        padding: 1.5rem;
-      }
-      
-      #notifyBtn {
-        width: 50px;
-        height: 50px;
-        left: 15px;
-        top: 10px;
-      }
-      
-      #installBtn {
-        bottom: 15px;
-        left: 15px;
-        padding: 0.75rem 1.25rem;
-        font-size: 0.9rem;
-      }
-    }
-  </style>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #2c3e50, #34495e); color: white; padding: 25px; text-align: center; position: relative; }
+        .header h1 { font-size: 2.2em; margin-bottom: 10px; font-weight: 300; }
+        .install-btn { position: absolute; top: 15px; left: 15px; background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; border: none; padding: 12px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; display: none; transition: all 0.3s ease; z-index: 1000; }
+        .install-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .section { padding: 25px; display: block; }
+        .hidden { display: none !important; }
+        .login-form { text-align: center; max-width: 500px; margin: 0 auto; }
+        .input-group { margin-bottom: 20px; }
+        input, select { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px; transition: all 0.3s ease; }
+        input:focus, select:focus { border-color: #3498db; outline: none; box-shadow: 0 0 10px rgba(52,152,219,0.3); }
+        .btn { background: linear-gradient(135deg, #3498db, #2980b9); color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin: 5px; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .btn-logout { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .btn-success { background: linear-gradient(135deg, #27ae60, #229954); }
+        .btn-warning { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .teacher-info { background: #ecf0f1; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-right: 5px solid #3498db; }
+        .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        th { background: linear-gradient(135deg, #34495e, #2c3e50); color: white; padding: 15px 10px; text-align: right; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 10px; border-bottom: 1px solid #ecf0f1; text-align: right; font-size: 14px; }
+        tr:hover { background-color: #f8f9fa; }
+        .loading { text-align: center; padding: 40px; font-size: 18px; color: #666; background: rgba(255,255,255,0.95); border-radius: 10px; margin: 20px 0; }
+        .loading.success { color: #27ae60; background: rgba(39,174,96,0.1); border: 1px solid rgba(39,174,96,0.3); }
+        .loading.error { color: #e74c3c; background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.3); }
+        .result-cell { font-weight: bold; text-align: center; font-size: 13px; padding: 8px 5px; border-radius: 5px; transition: all 0.3s ease; border: 1px solid transparent; }
+        .result-excellent { color: #27ae60; background-color: rgba(39,174,96,0.1); border-color: rgba(39,174,96,0.3); }
+        .result-good { color: #3498db; background-color: rgba(52,152,219,0.1); border-color: rgba(52,152,219,0.3); }
+        .result-average { color: #f39c12; background-color: rgba(243,156,18,0.1); border-color: rgba(243,156,18,0.3); }
+        .result-poor { color: #e74c3c; background-color: rgba(231,76,60,0.1); border-color: rgba(231,76,60,0.3); }
+        .student-name { color: #3498db; cursor: pointer; font-weight: bold; transition: all 0.3s ease; display: inline-block; }
+        .student-name:hover { color: #2980b9; background-color: rgba(52,152,219,0.1); transform: translateY(-1px); }
+        .edit-btn { background-color: #f39c12; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 12px; transition: background-color 0.3s ease; }
+        .edit-btn:hover { background-color: #e67e22; }
+        .search-container { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 15px 0; }
+        .search-container input, .search-container select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; flex: 1; min-width: 200px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; overflow-y: auto; }
+        .modal-content { background: white; margin: 2% auto; padding: 25px; border-radius: 15px; width: 95%; max-width: 800px; max-height: 90vh; overflow-y: auto; position: relative; }
+        .close-modal { position: absolute; top: 15px; left: 15px; font-size: 24px; cursor: pointer; color: #666; background: #f0f0f0; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .sync-btn-container { position: relative; display: inline-block; }
+        .pending-badge { position: absolute; top: -8px; right: -8px; background: #e74c3c; color: white; border-radius: 20px; padding: 2px 8px; font-size: 11px; font-weight: bold; }
+        .debug-panel { background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px solid #dee2e6; }
+        .qr-scanner-container { position: relative; width: 100%; max-width: 500px; margin: 0 auto; text-align: center; }
+        #qrScanner { width: 100%; height: 300px; border: 2px dashed #3498db; border-radius: 10px; margin-bottom: 15px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; color: #666; }
+        #qrScanner video { width: 100%; height: 100%; border-radius: 8px; object-fit: cover; }
+        .scanner-frame { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 200px; border: 2px solid #3498db; border-radius: 10px; box-shadow: 0 0 0 1000px rgba(0,0,0,0.3); }
+        .qr-result { margin-top: 15px; padding: 10px; border-radius: 5px; }
+        .qr-result.success { background: #d4edda; color: #155724; }
+        .qr-result.error { background: #f8d7da; color: #721c24; }
+        .edit-modal-header { position: sticky; top: 0; background: white; padding: 15px 0; border-bottom: 2px solid #ecf0f1; z-index: 10; margin-bottom: 15px; }
+        .edit-form-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .month-section { background: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px solid #dee2e6; }
+        .month-title { color: #2c3e50; margin-bottom: 15px; text-align: center; font-size: 1.2em; border-bottom: 2px solid #3498db; padding-bottom: 8px; }
+        .scores-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .score-group { display: flex; flex-direction: column; }
+        .score-group input { padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        .total-display, .result-display { grid-column: 1 / -1; background: #e8f4fd; padding: 10px; border-radius: 5px; text-align: center; margin-top: 10px; }
+        .top-save-btn { position: sticky; top: 80px; background: linear-gradient(135deg, #27ae60, #229954); color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; display: block; width: 220px; text-align: center; margin: 10px auto; }
+        .month-selection { text-align: center; padding: 20px; }
+        .month-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; margin-top: 30px; }
+        .month-card { background: white; border-radius: 24px; padding: 30px 20px; text-align: center; cursor: pointer; transition: all 0.4s cubic-bezier(0.2,0.9,0.4,1.1); box-shadow: 0 12px 28px rgba(0,0,0,0.1); position: relative; overflow: hidden; border: none; }
+        .month-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); }
+        .month-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 20px 35px rgba(0,0,0,0.2); }
+        .month-icon { font-size: 4.2rem; margin-bottom: 15px; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); transition: transform 0.3s; }
+        .month-card:hover .month-icon { transform: scale(1.1); }
+        .month-card h3 { font-size: 1.8rem; margin: 15px 0 10px; font-weight: 700; letter-spacing: -0.5px; }
+        .month-card p { color: #5a6e7c; font-size: 0.9rem; line-height: 1.5; margin-top: 10px; }
+        .month-card.month-1 { background: linear-gradient(145deg, #f0f9ff, #e1f0fa); border-bottom: 5px solid #3498db; }
+        .month-card.month-1 h3 { color: #2980b9; }
+        .month-card.month-2 { background: linear-gradient(145deg, #f0fff4, #e0f5e6); border-bottom: 5px solid #27ae60; }
+        .month-card.month-2 h3 { color: #1e8449; }
+        .month-card.month-3 { background: linear-gradient(145deg, #fff8e7, #ffe6c2); border-bottom: 5px solid #f39c12; }
+        .month-card.month-3 h3 { color: #d35400; }
+        .month-card.all-months { background: linear-gradient(145deg, #f5f0ff, #eae0fa); border-bottom: 5px solid #9b59b6; }
+        .month-card.all-months h3 { color: #8e44ad; }
+        .month-workspace { display: none; }
+        .month-workspace.active { display: block; }
+        .back-to-selection { background: linear-gradient(135deg, #95a5a6, #7f8c8d); margin-bottom: 20px; }
+        .current-month-header { padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; color: white; }
+        .current-month-header.month-1 { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .current-month-header.month-2 { background: linear-gradient(135deg, #27ae60, #229954); }
+        .current-month-header.month-3 { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .current-month-header.all-months { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        @media (max-width: 768px) {
+            .container { margin: 10px; border-radius: 10px; }
+            .controls { flex-direction: column; align-items: stretch; }
+            .search-container { flex-direction: column; }
+            table { font-size: 12px; }
+            th, td { padding: 8px 5px; }
+            .scores-grid { grid-template-columns: 1fr; }
+            .month-card { padding: 20px 15px; }
+            .month-icon { font-size: 3rem; }
+        }
+        @media (min-width: 769px) {
+            .edit-form-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        }
+    </style>
 </head>
 <body>
-
-  <!-- زر تفعيل الإشعارات -->
-  <button id="notifyBtn" title="تفعيل الإشعارات">
-    <i class="fas fa-bell"></i>
-  </button>
-  
-  <!-- زر تثبيت التطبيق -->
-  <button id="installBtn" class="hidden">
-    <i class="fas fa-download"></i>
-    <span>تثبيت التطبيق</span>
-  </button>
-
-  <!-- شريط التنقل -->
-  <nav class="navbar navbar-expand-lg navbar-dark" style="background: var(--primary-color);">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="#">
-        <i class="fas fa-school me-2"></i>مجمع شهداء التربية النموذجي
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="#results"><i class="fas fa-chart-line me-1"></i> المحصلات والنتائج</a></li>
-          <li class="nav-item"><a class="nav-link" href="#absence"><i class="fas fa-user-clock me-1"></i> غياب الطلاب</a></li>
-          <li class="nav-item"><a class="nav-link" href="#books"><i class="fas fa-book me-1"></i> المناهج والكتب</a></li>
-          <li class="nav-item"><a class="nav-link" href="#activities"><i class="fas fa-running me-1"></i> الأنشطة الدراسية</a></li>
-          <li class="nav-item"><a class="nav-link" href="#rules"><i class="fas fa-gavel me-1"></i> الأنظمة والقوانين</a></li>
-          <li class="nav-item"><a class="nav-link" href="#location"><i class="fas fa-map-marker-alt me-1"></i> موقع المجمع</a></li>
-        </ul>
-      </div>
+<div class="container">
+    <div class="header">
+        <button class="install-btn" id="installBtn">📲 تثبيت التطبيق</button>
+        <h1>🎓 نظام إدارة نتائج الطلاب</h1>
+        <p>مزامنة آمنة مع Google Sheets</p>
     </div>
-  </nav>
 
-  <!-- رأس الصفحة -->
-  <header class="school-header">
-    <div class="container d-flex justify-content-between align-items-center">
-      <h1 class="text-end">
-        <i class="fas fa-graduation-cap me-2"></i>
-        مجمع شهداء التربية النموذجي
-        <br>
-        <small class="fs-6 fw-normal">نحو تعليم متميز وبيئة تعليمية متكاملة</small>
-      </h1>
-      <img src="logo.png" alt="شعار المدرسة" class="school-logo">
+    <!-- شاشة تسجيل الدخول -->
+    <div id="loginSection" class="section">
+        <div class="login-form">
+            <h2 style="margin-bottom:30px; color:#2c3e50;">🔐 تسجيل الدخول</h2>
+            <div class="input-group">
+                <input type="text" id="teacherId" placeholder="أدخل معرف المعلم..." autocomplete="off">
+            </div>
+            <div class="connection-status" id="connectionStatus">⏳ جاري الاتصال بـ Google Sheets...</div>
+            <button class="btn btn-success" id="loginBtn" disabled>🔗 الاتصال والتحميل</button>
+            <button class="btn btn-warning" id="retryBtn">🔄 إعادة المحاولة</button>
+            <button class="btn" id="useLocalDataBtn" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">💾 استخدام البيانات المحلية</button>
+            <div class="debug-panel"><h4>🐛 معلومات النظام:</h4><div id="debugInfo">جاري التهيئة...</div><div id="pwaStatus">حالة PWA: جاري التحميل...</div></div>
+        </div>
     </div>
-  </header>
 
-  <!-- الصورة الرئيسية -->
-  <section class="container my-5">
-    <div class="section-card text-center">
-      <div class="section-img">
-        <img src="school.gif" alt="صورة المدرسة المتحركة" class="img-fluid">
-      </div>
+    <!-- نافذة اختيار الشهر -->
+    <div id="monthSelectionSection" class="section hidden">
+        <div class="teacher-info"><h3>👋 مرحباً بك <span id="welcomeTeacherName"></span></h3><p>اختر الشهر الذي تريد العمل عليه:</p></div>
+        <div class="month-selection">
+            <div class="month-cards">
+                <div class="month-card month-1" data-month="1">
+                    <div class="month-icon">📘✨</div>
+                    <h3>الشهر الأول</h3>
+                    <p>مواظبة • شفهي • واجبات • تحريري</p>
+                </div>
+                <div class="month-card month-2" data-month="2">
+                    <div class="month-icon">📗🌟</div>
+                    <h3>الشهر الثاني</h3>
+                    <p>مواظبة • شفهي • واجبات • تحريري</p>
+                </div>
+                <div class="month-card month-3" data-month="3">
+                    <div class="month-icon">📙⭐</div>
+                    <h3>الشهر الثالث</h3>
+                    <p>مواظبة • واجبات • شفهي • تحريري</p>
+                </div>
+                <div class="month-card all-months" data-month="all">
+                    <div class="month-icon">📚🔍</div>
+                    <h3>جميع الشهور</h3>
+                    <p>عرض وإدارة كل الأشهر</p>
+                </div>
+            </div>
+        </div>
     </div>
-  </section>
 
-  <!-- قسم المحصلات والنتائج -->
-  <section id="results" class="container">
-    <div class="section-card">
-      <h2 class="section-title"><i class="fas fa-chart-bar me-2"></i> المحصلات والنتائج</h2>
-      <p class="mb-4">يمكنك الاطلاع على نتائج الطلاب والمحصلة الدراسية لجميع المراحل التعليمية من خلال هذا القسم.</p>
-      <div class="row row-cols-2 row-cols-md-3 g-3">
-        <div class="col">
-          <a href="results_grade1.html" class="btn btn-primary-custom grade-btn w-100">
-            <i class="fas fa-user-graduate"></i>
-            <span>السابع الأساسي</span>
-          </a>
+    <!-- الشهر الأول -->
+    <div id="month1Workspace" class="month-workspace">
+        <div class="controls">
+            <button class="btn back-to-selection" onclick="backToMonthSelection()">⬅ العودة</button>
+            <button class="btn btn-logout" id="logoutBtn1">تسجيل الخروج</button>
+            <div><span>المعلم: </span><span id="currentTeacher1"></span> | <span>الطلاب: </span><span id="studentsCount1">0</span></div>
         </div>
-        <div class="col">
-          <a href="results_grade1.html" class="btn btn-primary-custom grade-btn w-100">
-            <i class="fas fa-user-graduate"></i>
-            <span>الثامن الأساسي</span>
-          </a>
+        <div class="current-month-header month-1"><h2>📘 الشهر الأول - إدارة الدرجات</h2></div>
+        <div class="search-container">
+            <input type="text" id="searchNameInput1" placeholder="🔍 تصفية بالاسم...">
+            <select id="classNameFilter1"><option value="">جميع الشعب</option></select>
+            <button class="btn" id="qrScanBtn1" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">📷 مسح QR</button>
+            <button class="btn" id="exportExcelBtn1" style="background: linear-gradient(135deg, #2ecc71, #27ae60);">📊 تصدير Excel</button>
+            <button class="btn" id="importExcelBtn1" style="background: linear-gradient(135deg, #f1c40f, #f39c12);">📂 استيراد Excel</button>
+            <div class="sync-btn-container">
+                <button class="btn" id="syncSheetsBtn1" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">☁️ مزامنة</button>
+                <div id="syncStatus1">المزامنة: متوقفة</div>
+                <span id="pendingCount1" class="pending-badge hidden">0</span>
+            </div>
         </div>
-        <div class="col">
-          <a href="results_grade1.html" class="btn btn-primary-custom grade-btn w-100">
-            <i class="fas fa-user-graduate"></i>
-            <span>التاسع الأساسي</span>
-          </a>
-        </div>
-        <div class="col">
-          <a href="results_grade1.html" class="btn btn-primary-custom grade-btn w-100">
-            <i class="fas fa-university"></i>
-            <span>الأول الثانوي</span>
-          </a>
-        </div>
-        <div class="col">
-          <a href="results_grade1.html" class="btn btn-primary-custom grade-btn w-100">
-            <i class="fas fa-university"></i>
-            <span>الثاني الثانوي</span>
-          </a>
-        </div>
-        <div class="col">
-          <a href="results_grade3.html" class="btn btn-primary-custom grade-btn w-100">
-            <i class="fas fa-university"></i>
-            <span>الثالث الثانوي</span>
-          </a>
-        </div>
-      </div>
+        <div style="overflow-x:auto;"><table class="month-table"><thead><tr><th>ID</th><th>Barcode</th><th>الاسم</th><th>الشعبة</th><th>مواظبة1</th><th>شفهي1</th><th>واجبات1</th><th>تحريري1</th><th>المجموع1</th><th>محصلة1</th><th>الإجراءات</th></tr></thead><tbody id="month1TableBody"><tr><td colspan="11" style="text-align:center;">⏳ جاري تحميل البيانات...</td></tr></tbody></table></div>
     </div>
-  </section>
 
-  <!-- قسم غياب الطلاب -->
-  <section id="absence" class="container">
-    <div class="section-card">
-      <h2 class="section-title"><i class="fas fa-user-clock me-2"></i> غياب الطلاب</h2>
-      <p class="mb-4">يمكنك الاطلاع على عدد أيام الغياب وتاريخ الغياب للطالب من خلال هذا القسم.</p>
-      <div class="d-flex flex-column flex-md-row gap-3">
-        <a href="absence.html" class="btn btn-primary-custom btn-custom">
-          <i class="fas fa-calendar-alt"></i>
-          متابعة غياب النصف الأول
-        </a>
-        <a href="‏‏absence - 1.html" class="btn btn-primary-custom btn-custom">
-          <i class="fas fa-calendar-check"></i>
-          متابعة الغياب النصف الثاني
-        </a>
-      </div>
-    </div>
-  </section>
-   <!-- قسم الأنشطة الدراسية -->
-  <section id="activities" class="container">
-    <div class="section-card">
-      <h2 class="section-title"><i class="fas fa-running me-2"></i> الأنشطة الدراسية</h2>
-      <p class="mb-4">تعرف على الأنشطة والمسابقات التي تقيمها المدرسة لتعزيز مهارات الطلاب.</p>
-      <a href="activities.html" class="btn btn-warning-custom btn-custom">
-        <i class="fas fa-trophy"></i>
-        عرض الأنشطة والمسابقات
-      </a>
-    </div>
-  </section>
-
-  <!-- قسم المناهج والكتب الدراسية -->
-  <section id="books" class="container">
-    <div class="section-card">
-      <h2 class="section-title"><i class="fas fa-book me-2"></i> المناهج والكتب الدراسية</h2>
-      <p class="mb-4">تصفح المناهج التعليمية وتحميل الكتب الدراسية لجميع المراحل الدراسية.</p>
-      <div class="row row-cols-2 row-cols-md-3 g-3">
-        <div class="col">
-          <a href="https://www.al-amgaad.com/2021/07/seventh-grade-yemen-books-pdf.html" target="_blank" class="btn btn-success-custom grade-btn w-100">
-            <i class="fas fa-book-open"></i>
-            <span>منهج الصف السابع</span>
-          </a>
+    <!-- الشهر الثاني -->
+    <div id="month2Workspace" class="month-workspace">
+        <div class="controls">
+            <button class="btn back-to-selection" onclick="backToMonthSelection()">⬅ العودة</button>
+            <button class="btn btn-logout" id="logoutBtn2">تسجيل الخروج</button>
+            <div><span>المعلم: </span><span id="currentTeacher2"></span> | <span>الطلاب: </span><span id="studentsCount2">0</span></div>
         </div>
-        <div class="col">
-          <a href="https://www.al-amgaad.com/2021/07/eighth-grade-yemen-books-pdf.html" target="_blank" class="btn btn-success-custom grade-btn w-100">
-            <i class="fas fa-book-open"></i>
-            <span>منهج الصف الثامن</span>
-          </a>
+        <div class="current-month-header month-2"><h2>📗 الشهر الثاني</h2></div>
+        <div class="search-container">
+            <input type="text" id="searchNameInput2" placeholder="🔍 تصفية بالاسم...">
+            <select id="classNameFilter2"><option value="">جميع الشعب</option></select>
+            <button class="btn" id="qrScanBtn2" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">📷 مسح QR</button>
+            <button class="btn" id="exportExcelBtn2" style="background: linear-gradient(135deg, #2ecc71, #27ae60);">📊 تصدير Excel</button>
+            <button class="btn" id="importExcelBtn2" style="background: linear-gradient(135deg, #f1c40f, #f39c12);">📂 استيراد Excel</button>
+            <div class="sync-btn-container">
+                <button class="btn" id="syncSheetsBtn2" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">☁️ مزامنة</button>
+                <div id="syncStatus2">المزامنة: متوقفة</div>
+                <span id="pendingCount2" class="pending-badge hidden">0</span>
+            </div>
         </div>
-        <div class="col">
-          <a href="https://www.al-amgaad.com/2021/07/ninth-grade-yemen-books-pdf.html" target="_blank" class="btn btn-success-custom grade-btn w-100">
-            <i class="fas fa-book-open"></i>
-            <span>منهج الصف التاسع</span>
-          </a>
-        </div>
-        <div class="col">
-          <a href="https://www.al-amgaad.com/2021/07/tenth-grade-yemen-books-pdf.html" target="_blank" class="btn btn-success-custom grade-btn w-100">
-            <i class="fas fa-graduation-cap"></i>
-            <span>منهج أول ثانوي</span>
-          </a>
-        </div>
-        <div class="col">
-          <a href="https://www.al-amgaad.com/2021/07/eleventh-grade-yemen-books-pdf.html" target="_blank" class="btn btn-success-custom grade-btn w-100">
-            <i class="fas fa-graduation-cap"></i>
-            <span>منهج ثاني ثانوي</span>
-          </a>
-        </div>
-        <div class="col">
-          <a href="https://www.al-amgaad.com/2021/07/third-secondary-yemen-books-pdf" target="_blank" class="btn btn-success-custom grade-btn w-100">
-            <i class="fas fa-graduation-cap"></i>
-            <span>منهج ثالث ثانوي</span>
-          </a>
-        </div>
-      </div>
+        <div style="overflow-x:auto;"><table class="month-table"><thead><tr><th>ID</th><th>Barcode</th><th>الاسم</th><th>الشعبة</th><th>مواظبة2</th><th>شفهي2</th><th>واجبات2</th><th>تحريري2</th><th>المجموع2</th><th>محصلة2</th><th>الإجراءات</th></tr></thead><tbody id="month2TableBody"><tr><td colspan="11">جاري التحميل...</td></tr></tbody></table></div>
     </div>
-  </section>
 
- 
-
-  <!-- قسم الأنظمة والقوانين -->
-  <section id="rules" class="container">
-    <div class="section-card">
-      <h2 class="section-title"><i class="fas fa-gavel me-2"></i> الأنظمة والقوانين</h2>
-      <p class="mb-4">راجع لوائح المدرسة والقوانين التنظيمية التي تضمن بيئة تعليمية سليمة.</p>
-      
-      <button class="btn btn-danger-custom btn-custom mb-4" id="showRulesBtn">
-        <i class="fas fa-scroll"></i>
-        <span id="rulesBtnText">قراءة اللوائح والقوانين</span>
-      </button>
-
-      <div id="rulesContent" class="rules-list" style="display: none;">
-        <ul class="mb-0">
-          <li><i class="fas fa-check-circle text-success me-2"></i> الالتزام بالحضور اليومي وعدم التأخير عن الحصص الدراسية.</li>
-          <li><i class="fas fa-check-circle text-success me-2"></i> احترام المعلمين والإداريين والزملاء في جميع الأوقات.</li>
-          <li><i class="fas fa-check-circle text-success me-2"></i> الحفاظ على نظافة الصف والمرافق العامة داخل المجمع.</li>
-          <li><i class="fas fa-check-circle text-success me-2"></i> يمنع استخدام الهاتف المحمول أثناء الدوام الدراسي.</li>
-          <li><i class="fas fa-check-circle text-success me-2"></i> الالتزام بالزي المدرسي الرسمي وعدم التعديل عليه.</li>
-          <li><i class="fas fa-check-circle text-success me-2"></i> يمنع الغش في الاختبارات ويعرض الطالب للمساءلة.</li>
-          <li><i class="fas fa-check-circle text-success me-2"></i> المحافظة على الكتب والوسائل التعليمية من التلف أو الضياع.</li>
-          <li><i class="fas fa-check-circle text-success me-2"></i> يمنع مغادرة المدرسة أثناء الدوام إلا بإذن خطي من الإدارة.</li>
-          <li><i class="fas fa-check-circle text-success me-2"></i> المشاركة الإيجابية في الأنشطة المدرسية والفعاليات التربوية.</li>
-        </ul>
-      </div>
+    <!-- الشهر الثالث -->
+    <div id="month3Workspace" class="month-workspace">
+        <div class="controls">
+            <button class="btn back-to-selection" onclick="backToMonthSelection()">⬅ العودة</button>
+            <button class="btn btn-logout" id="logoutBtn3">تسجيل الخروج</button>
+            <div><span>المعلم: </span><span id="currentTeacher3"></span> | <span>الطلاب: </span><span id="studentsCount3">0</span></div>
+        </div>
+        <div class="current-month-header month-3"><h2>📙 الشهر الثالث</h2></div>
+        <div class="search-container">
+            <input type="text" id="searchNameInput3" placeholder="🔍 تصفية بالاسم...">
+            <select id="classNameFilter3"><option value="">جميع الشعب</option></select>
+            <button class="btn" id="qrScanBtn3" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">📷 مسح QR</button>
+            <button class="btn" id="exportExcelBtn3" style="background: linear-gradient(135deg, #2ecc71, #27ae60);">📊 تصدير Excel</button>
+            <button class="btn" id="importExcelBtn3" style="background: linear-gradient(135deg, #f1c40f, #f39c12);">📂 استيراد Excel</button>
+            <div class="sync-btn-container">
+                <button class="btn" id="syncSheetsBtn3" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">☁️ مزامنة</button>
+                <div id="syncStatus3">المزامنة: متوقفة</div>
+                <span id="pendingCount3" class="pending-badge hidden">0</span>
+            </div>
+        </div>
+        <div style="overflow-x:auto;"><table class="month-table"><thead><tr><th>ID</th><th>Barcode</th><th>الاسم</th><th>الشعبة</th><th>مواظبة3</th><th>واجبات3</th><th>شفهي3</th><th>تحريري3</th><th>المجموع3</th><th>محصلة3</th><th>الإجراءات</th></tr></thead><tbody id="month3TableBody"><tr><td colspan="11">جاري التحميل...</td></tr></tbody></table></div>
     </div>
-  </section>
 
-  <!-- قسم موقع المجمع -->
-  <section id="location" class="container">
-    <div class="section-card">
-      <h2 class="section-title"><i class="fas fa-map-marker-alt me-2"></i> موقع المجمع</h2>
-      <p class="mb-4">في هذا القسم يتم تحديد الموقع الجغرافي للمجمع من خلال خرائط قوقل.</p>
-      
-      <div class="map-container ratio ratio-16x9">
-        <iframe 
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3841.6503134635336!2d43.9391179!3d15.663598799999997!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1601514cc4cb74b7%3A0x536417049c60c3ca!2z2YXYrNmF2Lkg2LTZh9iv2KfYoSDYp9mE2KrYsdio2YrYqSDYp9mE2YbZhdmI2LDYrNmK!5e0!3m2!1sar!2s!4v1739222376794!5m2!1sar!2s" 
-          style="border:0;" 
-          allowfullscreen="" 
-          loading="lazy" 
-          referrerpolicy="no-referrer-when-downgrade">
-        </iframe>
-      </div>
+    <!-- جميع الشهور -->
+    <div id="allMonthsWorkspace" class="month-workspace">
+        <div class="controls">
+            <button class="btn back-to-selection" onclick="backToMonthSelection()">⬅ العودة</button>
+            <button class="btn btn-logout" id="logoutBtnAll">تسجيل الخروج</button>
+            <div><span>المعلم: </span><span id="currentTeacherAll"></span> | <span>الطلاب: </span><span id="studentsCountAll">0</span></div>
+        </div>
+        <div class="current-month-header all-months"><h2>📚 جميع الشهور - عرض شامل</h2></div>
+        <div class="search-container">
+            <input type="text" id="searchNameInputAll" placeholder="🔍 تصفية بالاسم...">
+            <select id="classNameFilterAll"><option value="">جميع الشعب</option></select>
+            <button class="btn" id="qrScanBtnAll" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">📷 مسح QR</button>
+            <button class="btn" id="exportExcelBtnAll" style="background: linear-gradient(135deg, #2ecc71, #27ae60);">📊 تصدير Excel</button>
+            <button class="btn" id="importExcelBtnAll" style="background: linear-gradient(135deg, #f1c40f, #f39c12);">📂 استيراد Excel</button>
+            <div class="sync-btn-container">
+                <button class="btn" id="syncSheetsBtnAll" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">☁️ مزامنة</button>
+                <div id="syncStatusAll">المزامنة: متوقفة</div>
+                <span id="pendingCountAll" class="pending-badge hidden">0</span>
+            </div>
+        </div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Barcode</th><th>الاسم</th><th>الشعبة</th><th>مو1</th><th>ش1</th><th>واج1</th><th>تح1</th><th>المج1</th><th>مح1</th><th>مو2</th><th>ش2</th><th>واج2</th><th>تح2</th><th>المج2</th><th>مح2</th><th>مو3</th><th>واج3</th><th>ش3</th><th>تح3</th><th>المج3</th><th>مح3</th><th>الإجراءات</th></tr></thead><tbody id="studentsTableBody"><tr><td colspan="23">جاري التحميل...</td></tr></tbody></table></div>
     </div>
-  </section>
 
-  <!-- تذييل الصفحة -->
-  <footer>
-    <div class="container text-center">
-      <p class="mb-2">جميع الحقوق محفوظة © 2023 مجمع شهداء التربية النموذجي</p>
-      <p class="mb-0">تصميم وتطوير: إدارة المجمع</p>
-    </div>
-  </footer>
+    <div id="loading" class="loading hidden">⏳ جاري التحميل...</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Modal QR -->
+    <div id="qrModal" class="modal"><div class="modal-content"><span class="close-modal" onclick="closeModal('qrModal')">&times;</span><h3>📷 مسح QR</h3><div class="qr-scanner-container"><div id="qrScanner"><span>جاري تشغيل الكاميرا...</span></div><button class="btn btn-warning" id="stopScannerBtn">⏹️ إيقاف</button><div id="qrResult" class="qr-result hidden"></div></div></div></div>
 
-  <!-- تفعيل زر الإشعارات بعد التحميل -->
-  <script>
-    const notifyBtn = document.getElementById('notifyBtn');
-    notifyBtn.style.display = 'none'; // إخفاء الزر افتراضيًا
+    <!-- Modal تعديل -->
+    <div id="editModal" class="modal"><div class="modal-content"><span class="close-modal" onclick="closeModal('editModal')">&times;</span><div class="edit-modal-header"><h3>✏️ تعديل درجات الطالب: <span id="currentStudentName"></span></h3><div class="current-month-indicator" id="currentMonthIndicator">الشهر</div><button type="button" class="top-save-btn" onclick="saveAllEdits()">✅ حفظ التعديلات</button></div><input type="hidden" id="editStudentId"><input type="hidden" id="currentEditMonth"><div id="editFormContainer" class="edit-form-grid"></div></div></div>
+</div>
 
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(function(OneSignal) {
+<script>
+    // الإعدادات والمتغيرات العامة
+    const LOCAL_STORAGE_KEY = 'studentsData';
+    const PENDING_UPDATES_KEY = 'pendingUpdates';
+    const TEACHER_SESSION_KEY = 'teacherSession';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwcaLokiABRJmf9LzZOAskFoKhdLvOeoFHXt9-a5zAb5eTSMwqyNCzgB_HDOsWF9-hO/exec'; 
 
-      // التحقق من حالة الاشتراك
-      OneSignal.isPushNotificationsEnabled().then(function(isEnabled) {
-        if (!isEnabled) {
-          notifyBtn.style.display = 'block'; // إظهار الزر إذا لم يكن مشترك
-        }
-      });
-
-      // عند الضغط على الزر، طلب الاشتراك مرة أخرى
-      notifyBtn.addEventListener('click', function () {
-        OneSignal.showSlidedownPrompt().catch(function (error) {
-          alert("حدث خطأ أثناء محاولة تفعيل الإشعارات.");
-          console.error(error);
-        });
-      });
-    });
-  </script>
-
-  <!-- تحسين وتطوير زر تثبيت التطبيق -->
-  <script>
-    let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
-    let isAppInstalled = false;
-
-    // التحقق من أن المستخدم يستخدم متصفح يدعم PWA
-    const isPwaSupported = () => {
-      return 'BeforeInstallPromptEvent' in window;
+    const STUDENT_PROPERTIES = {
+        'ID':'id','Barcode':'barcode','الاسم':'studentName','الشعبة':'className','المعرف':'teacherId',
+        'مواظبة 1 ':'attendance1','شفهي 1':'oral1','واجبات 1':'homework1','تحريري 1':'written1','المجمـــــوع1':'total1','محصلة1':'result1',
+        'مواظبة 2':'attendance2','شفهي 2':'oral2','واجبات 2':'homework2','تحريري 2':'written2','المجمـــــوع2':'total2','محصلة2':'result2',
+        'مواظبة 3':'attendance3','واجبات 3':'homework3','شفهي 3':'oral3','تحريري 3':'written3','المجمـــــوع':'total3','محصلة3':'result3'
     };
 
-    // التحقق مما إذا كان التطبيق مثبتًا بالفعل
-    const checkIfAppInstalled = () => {
-      // طريقة 1: التحقق من display-mode
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        return true;
-      }
-      
-      // طريقة 2: التحقق من التطبيقات المثبتة (متصفحات محدودة الدعم)
-      if (window.navigator.getInstalledRelatedApps) {
-        window.navigator.getInstalledRelatedApps().then(apps => {
-          if (apps.length > 0) {
-            return true;
-          }
-        });
-      }
-      
-      // طريقة 3: استخدام localStorage لتذكر حالة التثبيت
-      if (localStorage.getItem('appInstalled') === 'true') {
-        return true;
-      }
-      
-      return false;
-    };
+    let currentTeacherId = '', allStudents = [], pendingUpdates = [], isSyncing = false, autoSyncInterval, currentMonth = 1;
+    let qrScanner = null, qrStream = null, deferredPrompt = null;
+    let syncRetryTimeout = null;
 
-    // تحديث حالة زر التثبيت
-    const updateInstallButton = () => {
-      isAppInstalled = checkIfAppInstalled();
-      
-      if (isAppInstalled) {
-        installBtn.classList.add('hidden');
-        console.log('التطبيق مثبت بالفعل');
-      } else if (deferredPrompt && isPwaSupported()) {
-        installBtn.classList.remove('hidden');
-        console.log('يمكن تثبيت التطبيق');
-      } else {
-        installBtn.classList.add('hidden');
-        console.log('المتصفح لا يدعم تثبيت التطبيق');
-      }
-    };
+    // عناصر DOM
+    const teacherIdInput = document.getElementById('teacherId'), loginSection = document.getElementById('loginSection');
+    const monthSelectionSection = document.getElementById('monthSelectionSection'), welcomeTeacherName = document.getElementById('welcomeTeacherName');
+    const loadingDiv = document.getElementById('loading'), connectionStatus = document.getElementById('connectionStatus');
+    const loginBtn = document.getElementById('loginBtn'), retryBtn = document.getElementById('retryBtn'), useLocalDataBtn = document.getElementById('useLocalDataBtn');
+    const installBtn = document.getElementById('installBtn'), debugInfo = document.getElementById('debugInfo'), pwaStatusDiv = document.getElementById('pwaStatus');
 
-    // حدث beforeinstallprompt
-    window.addEventListener('beforeinstallprompt', (e) => {
-      // منع المتصفح من إظهار التثبيت التلقائي
-      e.preventDefault();
-      deferredPrompt = e;
-      
-      // تحديث الزر بعد 2 ثانية للتأكد من تحميل كل شيء
-      setTimeout(updateInstallButton, 2000);
-      
-      // إضافة حدث النقر على زر التثبيت
-      installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        
-        // إظهار نافذة التثبيت
-        deferredPrompt.prompt();
-        
-        // انتظار اختيار المستخدم
-        const { outcome } = await deferredPrompt.userChoice;
-        
-        if (outcome === 'accepted') {
-          console.log('تم تثبيت التطبيق ✅');
-          localStorage.setItem('appInstalled', 'true');
-          installBtn.innerHTML = '<i class="fas fa-check-circle"></i><span>تم التثبيت بنجاح!</span>';
-          installBtn.style.background = 'linear-gradient(135deg, #28a745, #34ce57)';
-          
-          // إخفاء الزر بعد 3 ثوان
-          setTimeout(() => {
-            installBtn.classList.add('hidden');
-          }, 3000);
-        } else {
-          console.log('تم إلغاء التثبيت ❌');
-          installBtn.innerHTML = '<i class="fas fa-times-circle"></i><span>تم إلغاء التثبيت</span>';
-          installBtn.style.background = 'linear-gradient(135deg, #dc3545, #e4606d)';
-          
-          // إعادة الزر إلى حالته الأصلية بعد 3 ثوان
-          setTimeout(() => {
-            installBtn.innerHTML = '<i class="fas fa-download"></i><span>تثبيت التطبيق</span>';
-            installBtn.style.background = 'linear-gradient(135deg, #6f42c1, #8a63d2)';
-          }, 3000);
-        }
-        
-        deferredPrompt = null;
-      });
-    });
+    function updateDebugInfo(msg) { if(debugInfo) debugInfo.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${msg}</div>`; debugInfo.scrollTop = debugInfo.scrollHeight; }
+    function showLoading(show, msg='⏳ جاري التحميل...') { if(show) { loadingDiv.classList.remove('hidden'); loadingDiv.innerHTML = `<p>${msg}</p>`; loadingDiv.className = 'loading'; } else loadingDiv.classList.add('hidden'); }
+    function showError(msg) { showLoading(true, '❌ '+msg); loadingDiv.className = 'loading error'; setTimeout(()=>loadingDiv.classList.add('hidden'),4000); }
+    function showSuccess(msg) { showLoading(true, '✅ '+msg); loadingDiv.className = 'loading success'; setTimeout(()=>loadingDiv.classList.add('hidden'),3000); }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; if(id==='qrModal') stopQRScanner(); }
 
-    // حدث appinstalled
-    window.addEventListener('appinstalled', () => {
-      console.log('تم تثبيت التطبيق بنجاح');
-      localStorage.setItem('appInstalled', 'true');
-      isAppInstalled = true;
-      installBtn.classList.add('hidden');
-    });
+    // إدارة الجلسة
+    function saveTeacherSession(tid) { localStorage.setItem(TEACHER_SESSION_KEY, JSON.stringify({teacherId:tid,timestamp:new Date().toISOString()})); }
+    function loadTeacherSession() { const data = localStorage.getItem(TEACHER_SESSION_KEY); return data ? JSON.parse(data) : null; }
+    function clearTeacherSession() { localStorage.removeItem(TEACHER_SESSION_KEY); }
 
-    // تحديث حالة الزر عند تحميل الصفحة
-    document.addEventListener('DOMContentLoaded', updateInstallButton);
+    function saveDataToLocalStorage() { try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ students: allStudents, teacherId: currentTeacherId, timestamp: new Date().toISOString(), version: 2 })); return true; } catch(e) { showError('فشل حفظ البيانات محلياً'); return false; } }
+    function loadPendingUpdates() { try { return JSON.parse(localStorage.getItem(PENDING_UPDATES_KEY) || '[]'); } catch(e) { return []; } }
+    function savePendingUpdates() { localStorage.setItem(PENDING_UPDATES_KEY, JSON.stringify(pendingUpdates)); updatePendingCount(); }
+    function updatePendingCount() { let cnt = pendingUpdates.length; document.querySelectorAll('#pendingCount1,#pendingCount2,#pendingCount3,#pendingCountAll').forEach(span => { span.textContent = cnt; if(cnt>0) span.classList.remove('hidden'); else span.classList.add('hidden'); }); document.querySelectorAll('#syncStatus1,#syncStatus2,#syncStatus3,#syncStatusAll').forEach(el => el.textContent = cnt ? `المزامنة: ${cnt} معلقة` : 'المزامنة: متوقفة'); }
+
+    // المزامنة الدقيقة
+    async function syncPendingUpdates(isAuto = false) {
+        if(pendingUpdates.length === 0 || isSyncing) return;
+        isSyncing = true;
+        let updatesToSync = [...pendingUpdates];
+        updateDebugInfo(`بدء مزامنة ${updatesToSync.length} تحديث...`);
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
+            const response = await fetch(WEB_APP_URL, { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ updates: updatesToSync, teacherId: currentTeacherId }), signal: controller.signal });
+            clearTimeout(timeoutId);
+            if(!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if(data.status === 'success') {
+                pendingUpdates = pendingUpdates.filter(up => !updatesToSync.some(synced => synced.id === up.id && synced.row === up.row));
+                savePendingUpdates();
+                showSuccess(`✅ تمت مزامنة ${data.updatedCount || updatesToSync.length} تعديل`);
+                await fetchDataFromSheet(currentTeacherId, false);
+            } else throw new Error(data.error || 'فشل من السيرفر');
+        } catch(error) { updateDebugInfo(`فشل المزامنة: ${error.message}`); if(syncRetryTimeout) clearTimeout(syncRetryTimeout); syncRetryTimeout = setTimeout(() => { if(navigator.onLine) syncPendingUpdates(true); }, 30000); } 
+        finally { isSyncing = false; updatePendingCount(); }
+    }
+
+    function attemptAutoSync() { if(navigator.onLine && pendingUpdates.length > 0 && !isSyncing) syncPendingUpdates(true); }
+    function startAutoSync() { if(autoSyncInterval) clearInterval(autoSyncInterval); autoSyncInterval = setInterval(attemptAutoSync, 25000); window.addEventListener('online', () => attemptAutoSync()); attemptAutoSync(); }
+
+    // دوال البيانات
+    function mapData(data) { return data.map(item => { let newItem = { originalRowIndex: item.originalRowIndex }; for (let [arabicKey, jsKey] of Object.entries(STUDENT_PROPERTIES)) { let foundKey = Object.keys(item).find(k => k.trim().replace(/\s+/g,' ') === arabicKey.trim().replace(/\s+/g,' ')); let value = foundKey ? item[foundKey] : ''; if(jsKey.includes('total')||jsKey.includes('result')) newItem[jsKey] = (value && value!=='') ? parseFloat(value)||0 : 0; else if(jsKey.startsWith('attendance')||jsKey.startsWith('oral')||jsKey.startsWith('homework')||jsKey.startsWith('written')) newItem[jsKey] = (value && value!=='') ? value : ""; else newItem[jsKey] = (value && value!=='') ? value : ''; } newItem.id = newItem.id?.toString().trim()||''; newItem.teacherId = newItem.teacherId?.toString().trim()||''; newItem.barcode = newItem.barcode?.toString().trim()||''; return newItem; }); }
+    function formatGrade(val) { if(val===undefined||val===null||val==='') return ''; let n=parseFloat(val); return isNaN(n)?'':(n%1!==0?n.toFixed(1):n.toString()); }
+    function calculateTotal(student,term) { let att=parseFloat(student[`attendance${term}`])||0, oral=parseFloat(student[`oral${term}`])||0, hw=parseFloat(student[`homework${term}`])||0, wrt=parseFloat(student[`written${term}`])||0; return (att+oral+hw+wrt).toFixed(1).replace(/\.0$/,''); }
+    function calculateResult(total) { let val=parseFloat(total)||0; return (val/5).toFixed(1); }
+    function getResultClass(res) { let v=parseFloat(res)||0; if(v>=16) return 'result-cell result-excellent'; if(v>=11) return 'result-cell result-good'; if(v>=5) return 'result-cell result-average'; return 'result-cell result-poor'; }
+
+    async function fetchDataFromSheet(teacherId, showLoad=true) {
+        if(showLoad) showLoading(true,'⏳ جلب البيانات...');
+        try {
+            let resp = await fetch(WEB_APP_URL);
+            if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            let data = await resp.json();
+            if(data.status==='success' && data.data) {
+                allStudents = mapData(data.data).filter(s => s.teacherId === teacherId);
+                currentTeacherId = teacherId;
+                welcomeTeacherName.textContent = teacherId;
+                populateClassFilters();
+                if(showLoad) { showLoading(false); loginSection.classList.add('hidden'); monthSelectionSection.classList.remove('hidden'); showSuccess(`مرحباً ${teacherId}`); }
+                saveDataToLocalStorage();
+                return true;
+            } else throw new Error(data.error||'فشل الجلب');
+        } catch(e) { if(showLoad) showError('❌ فشل تحميل البيانات: '+e.message); return false; }
+    }
+
+    // دوال العرض
+    function renderMonth1Table(arr) { let tbody=document.getElementById('month1TableBody'); tbody.innerHTML=''; if(!arr.length){ tbody.innerHTML='<tr><td colspan="11">لا توجد بيانات</td></tr>'; document.getElementById('studentsCount1').textContent=0; return; } arr.forEach(s=>{ let tot=calculateTotal(s,1), res=calculateResult(tot); let row=tbody.insertRow(); row.innerHTML=`<td>${s.id}</td><td>${s.barcode}</td><td class="student-name" onclick="openEditModal('${s.id}')">${s.studentName}</td><td>${s.className}</td><td>${formatGrade(s.attendance1)}</td><td>${formatGrade(s.oral1)}</td><td>${formatGrade(s.homework1)}</td><td>${formatGrade(s.written1)}</td><td>${tot}</td><td class="${getResultClass(res)}">${res}</td><td><button class="edit-btn" onclick="openEditModal('${s.id}')">تعديل</button></td>`; }); document.getElementById('studentsCount1').textContent=arr.length; }
+    function renderMonth2Table(arr) { let tbody=document.getElementById('month2TableBody'); tbody.innerHTML=''; if(!arr.length){ tbody.innerHTML='<tr><td colspan="11">لا توجد بيانات</td></tr>'; document.getElementById('studentsCount2').textContent=0; return; } arr.forEach(s=>{ let tot=calculateTotal(s,2), res=calculateResult(tot); let row=tbody.insertRow(); row.innerHTML=`<td>${s.id}</td><td>${s.barcode}</td><td class="student-name" onclick="openEditModal('${s.id}')">${s.studentName}</td><td>${s.className}</td><td>${formatGrade(s.attendance2)}</td><td>${formatGrade(s.oral2)}</td><td>${formatGrade(s.homework2)}</td><td>${formatGrade(s.written2)}</td><td>${tot}</td><td class="${getResultClass(res)}">${res}</td><td><button class="edit-btn" onclick="openEditModal('${s.id}')">تعديل</button></td>`; }); document.getElementById('studentsCount2').textContent=arr.length; }
+    function renderMonth3Table(arr) { let tbody=document.getElementById('month3TableBody'); tbody.innerHTML=''; if(!arr.length){ tbody.innerHTML='<tr><td colspan="11">لا توجد بيانات</td></tr>'; document.getElementById('studentsCount3').textContent=0; return; } arr.forEach(s=>{ let tot=calculateTotal(s,3), res=calculateResult(tot); let row=tbody.insertRow(); row.innerHTML=`<td>${s.id}</td><td>${s.barcode}</td><td class="student-name" onclick="openEditModal('${s.id}')">${s.studentName}</td><td>${s.className}</td><td>${formatGrade(s.attendance3)}</td><td>${formatGrade(s.homework3)}</td><td>${formatGrade(s.oral3)}</td><td>${formatGrade(s.written3)}</td><td>${tot}</td><td class="${getResultClass(res)}">${res}</td><td><button class="edit-btn" onclick="openEditModal('${s.id}')">تعديل</button></td>`; }); document.getElementById('studentsCount3').textContent=arr.length; }
+    function renderAllMonthsTable(arr) { let tbody=document.getElementById('studentsTableBody'); tbody.innerHTML=''; if(!arr.length){ tbody.innerHTML='<tr><td colspan="23">لا توجد بيانات</td></tr>'; document.getElementById('studentsCountAll').textContent=0; return; } arr.forEach(s=>{ let tot1=calculateTotal(s,1), res1=calculateResult(tot1), tot2=calculateTotal(s,2), res2=calculateResult(tot2), tot3=calculateTotal(s,3), res3=calculateResult(tot3); let row=tbody.insertRow(); row.innerHTML=`<td>${s.id}</td><td>${s.barcode}</td><td class="student-name" onclick="openEditModal('${s.id}')">${s.studentName}</td><td>${s.className}</td><td>${formatGrade(s.attendance1)}</td><td>${formatGrade(s.oral1)}</td><td>${formatGrade(s.homework1)}</td><td>${formatGrade(s.written1)}</td><td>${tot1}</td><td class="${getResultClass(res1)}">${res1}</td><td>${formatGrade(s.attendance2)}</td><td>${formatGrade(s.oral2)}</td><td>${formatGrade(s.homework2)}</td><td>${formatGrade(s.written2)}</td><td>${tot2}</td><td class="${getResultClass(res2)}">${res2}</td><td>${formatGrade(s.attendance3)}</td><td>${formatGrade(s.homework3)}</td><td>${formatGrade(s.oral3)}</td><td>${formatGrade(s.written3)}</td><td>${tot3}</td><td class="${getResultClass(res3)}">${res3}</td><td><button class="edit-btn" onclick="openEditModal('${s.id}')">تعديل</button></td>`; }); document.getElementById('studentsCountAll').textContent=arr.length; }
     
-    // تحديث حالة الزر أيضًا عندما تصبح الصفحة مرئية
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        updateInstallButton();
-      }
-    });
+    function updateDisplayedStudents() { let search=(document.getElementById(`searchNameInput${currentMonth}`)?.value.trim().toLowerCase()||''); let classFilter=(document.getElementById(`classNameFilter${currentMonth}`)?.value||''); let filtered=allStudents.filter(s=> (search===''||s.studentName?.toLowerCase().includes(search)) && (classFilter===''||s.className===classFilter)); if(currentMonth===1) renderMonth1Table(filtered); else if(currentMonth===2) renderMonth2Table(filtered); else if(currentMonth===3) renderMonth3Table(filtered); else renderAllMonthsTable(filtered); }
+    function populateClassFilters() { let classes=[...new Set(allStudents.map(s=>s.className).filter(c=>c&&c.trim()!==''))]; for(let i=1;i<=3;i++){ let sel=document.getElementById(`classNameFilter${i}`); if(sel){ sel.innerHTML='<option value="">كل الشعب</option>'; classes.sort().forEach(c=>{let opt=document.createElement('option'); opt.value=c; opt.textContent=c; sel.appendChild(opt);}); } } let selAll=document.getElementById('classNameFilterAll'); if(selAll){ selAll.innerHTML='<option value="">كل الشعب</option>'; classes.sort().forEach(c=>{let opt=document.createElement('option'); opt.value=c; opt.textContent=c; selAll.appendChild(opt);}); } }
 
-    // تحديث حالة الزر كل 10 ثوان (للتأكد من أن الحالة محدثة)
-    setInterval(updateInstallButton, 10000);
-  </script>
+    // دوال Excel
+    function exportToExcel(month) {
+        let search=(document.getElementById(`searchNameInput${month}`)?.value.trim().toLowerCase()||''); let classFilter=(document.getElementById(`classNameFilter${month}`)?.value||''); let dataToExport = allStudents.filter(s=> (search===''||s.studentName?.toLowerCase().includes(search)) && (classFilter===''||s.className===classFilter));
+        if(dataToExport.length===0){ showError('لا توجد بيانات للتصدير'); return; }
+        let wsData = [['ID','Barcode','الاسم','الشعبة']];
+        if(month===1) wsData[0].push('مواظبة1','شفهي1','واجبات1','تحريري1','المجموع1','محصلة1');
+        else if(month===2) wsData[0].push('مواظبة2','شفهي2','واجبات2','تحريري2','المجموع2','محصلة2');
+        else if(month===3) wsData[0].push('مواظبة3','واجبات3','شفهي3','تحريري3','المجموع3','محصلة3');
+        else wsData[0].push('مواظبة1','شفهي1','واجبات1','تحريري1','المجموع1','محصلة1','مواظبة2','شفهي2','واجبات2','تحريري2','المجموع2','محصلة2','مواظبة3','واجبات3','شفهي3','تحريري3','المجموع3','محصلة3');
+        dataToExport.forEach(s=>{ let row=[s.id,s.barcode,s.studentName,s.className]; if(month===1) row.push(formatGrade(s.attendance1),formatGrade(s.oral1),formatGrade(s.homework1),formatGrade(s.written1),calculateTotal(s,1),calculateResult(calculateTotal(s,1))); else if(month===2) row.push(formatGrade(s.attendance2),formatGrade(s.oral2),formatGrade(s.homework2),formatGrade(s.written2),calculateTotal(s,2),calculateResult(calculateTotal(s,2))); else if(month===3) row.push(formatGrade(s.attendance3),formatGrade(s.homework3),formatGrade(s.oral3),formatGrade(s.written3),calculateTotal(s,3),calculateResult(calculateTotal(s,3))); else row.push(formatGrade(s.attendance1),formatGrade(s.oral1),formatGrade(s.homework1),formatGrade(s.written1),calculateTotal(s,1),calculateResult(calculateTotal(s,1)), formatGrade(s.attendance2),formatGrade(s.oral2),formatGrade(s.homework2),formatGrade(s.written2),calculateTotal(s,2),calculateResult(calculateTotal(s,2)), formatGrade(s.attendance3),formatGrade(s.homework3),formatGrade(s.oral3),formatGrade(s.written3),calculateTotal(s,3),calculateResult(calculateTotal(s,3))); wsData.push(row); });
+        let ws = XLSX.utils.aoa_to_sheet(wsData); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, `الطلاب_الشهر${month}`); XLSX.writeFile(wb, `طلاب_${currentTeacherId}_شهر${month}.xlsx`); showSuccess('تم تصدير الملف');
+    }
 
-  <!-- النص للقوانين -->
-  <script>
-    const showRulesBtn = document.getElementById("showRulesBtn");
-    const rulesContent = document.getElementById("rulesContent");
-    const rulesBtnText = document.getElementById("rulesBtnText");
+    function importExcel(month) {
+        let input = document.createElement('input'); input.type = 'file'; input.accept = '.xlsx, .xls';
+        input.onchange = async (e) => {
+            let file = e.target.files[0]; if(!file) return;
+            let data = await file.arrayBuffer(); let workbook = XLSX.read(data); let sheet = workbook.Sheets[workbook.SheetNames[0]]; let rows = XLSX.utils.sheet_to_json(sheet, {header:1, defval:""});
+            if(rows.length<2) { showError('الملف فارغ'); return; }
+            let headers = rows[0]; let idIdx = headers.findIndex(h=>h.toString().toLowerCase().includes('id'));
+            let attendanceIdx, oralIdx, homeworkIdx, writtenIdx;
+            if(month===1){ attendanceIdx = headers.findIndex(h=>h.includes('مواظبة1')); oralIdx = headers.findIndex(h=>h.includes('شفهي1')); homeworkIdx = headers.findIndex(h=>h.includes('واجبات1')); writtenIdx = headers.findIndex(h=>h.includes('تحريري1')); }
+            else if(month===2){ attendanceIdx = headers.findIndex(h=>h.includes('مواظبة2')); oralIdx = headers.findIndex(h=>h.includes('شفهي2')); homeworkIdx = headers.findIndex(h=>h.includes('واجبات2')); writtenIdx = headers.findIndex(h=>h.includes('تحريري2')); }
+            else { attendanceIdx = headers.findIndex(h=>h.includes('مواظبة3')); oralIdx = headers.findIndex(h=>h.includes('شفهي3')); homeworkIdx = headers.findIndex(h=>h.includes('واجبات3')); writtenIdx = headers.findIndex(h=>h.includes('تحريري3')); }
+            if(idIdx===-1){ showError('الملف لا يحتوي على عمود ID'); return; }
+            let updatesMade=0;
+            for(let i=1;i<rows.length;i++){ let row=rows[i]; let studentId = row[idIdx]?.toString().trim(); if(!studentId) continue; let student = allStudents.find(s=>s.id===studentId); if(!student) continue; let changed=false;
+                if(attendanceIdx!==-1 && row[attendanceIdx]!==undefined && row[attendanceIdx]!==''){ let newVal=row[attendanceIdx].toString(); if(student[`attendance${month}`]!=newVal){ student[`attendance${month}`]=newVal; changed=true; } }
+                if(oralIdx!==-1 && row[oralIdx]!==undefined && row[oralIdx]!=='' && month!==3){ let newVal=row[oralIdx].toString(); if(student[`oral${month}`]!=newVal){ student[`oral${month}`]=newVal; changed=true; } }
+                if(homeworkIdx!==-1 && row[homeworkIdx]!==undefined && row[homeworkIdx]!==''){ let newVal=row[homeworkIdx].toString(); if(student[`homework${month}`]!=newVal){ student[`homework${month}`]=newVal; changed=true; } }
+                if(writtenIdx!==-1 && row[writtenIdx]!==undefined && row[writtenIdx]!==''){ let newVal=row[writtenIdx].toString(); if(student[`written${month}`]!=newVal){ student[`written${month}`]=newVal; changed=true; } }
+                if(changed){ student[`total${month}`] = calculateTotal(student,month); student[`result${month}`] = calculateResult(student[`total${month}`]); pendingUpdates.push({ row:student.originalRowIndex, id:student.id, [`attendance${month}`]:student[`attendance${month}`], [`oral${month}`]:student[`oral${month}`], [`homework${month}`]:student[`homework${month}`], [`written${month}`]:student[`written${month}`] }); updatesMade++; }
+            }
+            if(updatesMade>0){ savePendingUpdates(); saveDataToLocalStorage(); updateDisplayedStudents(); showSuccess(`تم استيراد وتحديث ${updatesMade} طالب`); attemptAutoSync(); } else showSuccess('لا توجد تغييرات جديدة');
+        }; input.click();
+    }
 
-    showRulesBtn.addEventListener("click", function(e) {
-      e.preventDefault();
-      const isHidden = rulesContent.style.display === "none";
-      
-      if (isHidden) {
-        rulesContent.style.display = "block";
-        rulesBtnText.textContent = "إخفاء اللوائح والقوانين";
-        showRulesBtn.innerHTML = '<i class="fas fa-eye-slash"></i><span>إخفاء اللوائح والقوانين</span>';
-      } else {
-        rulesContent.style.display = "none";
-        rulesBtnText.textContent = "قراءة اللوائح والقوانين";
-        showRulesBtn.innerHTML = '<i class="fas fa-scroll"></i><span>قراءة اللوائح والقوانين</span>';
-      }
-    });
-  </script>
+    // QR Scanner and Edit functions
+    async function startQRScanner(month){ try{ let stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}); qrStream=stream; let video=document.createElement('video'); let canvas=document.createElement('canvas'); let ctx=canvas.getContext('2d'); let scannerDiv=document.getElementById('qrScanner'); scannerDiv.innerHTML=''; scannerDiv.appendChild(video); video.srcObject=stream; video.setAttribute("playsinline",true); video.play(); document.getElementById('qrModal').style.display='block'; document.getElementById('qrResult').classList.add('hidden'); function scan(){ if(video.readyState===video.HAVE_ENOUGH_DATA){ canvas.height=video.videoHeight; canvas.width=video.videoWidth; ctx.drawImage(video,0,0,canvas.width,canvas.height); let imgData=ctx.getImageData(0,0,canvas.width,canvas.height); let code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:"dontInvert"}); if(code){ let student=allStudents.find(s=>s.barcode?.toString().trim()===code.data.trim()); let resultDiv=document.getElementById('qrResult'); let resultText=document.getElementById('qrResultText'); if(student){ resultText.textContent=`✅ ${student.studentName}`; resultDiv.className='qr-result success'; stopQRScanner(); closeModal('qrModal'); openEditModal(student.id); } else { resultText.textContent=`❌ لم يتم العثور على باركود: ${code.data}`; resultDiv.className='qr-result error'; } resultDiv.classList.remove('hidden'); } } if(qrScanner) requestAnimationFrame(scan); } qrScanner=true; requestAnimationFrame(scan); }catch(e){ showError('تعذر الوصول للكاميرا'); } }
+    function stopQRScanner(){ if(qrStream){ qrStream.getTracks().forEach(t=>t.stop()); qrStream=null; } qrScanner=null; document.getElementById('qrScanner').innerHTML='<span>جاري تشغيل الكاميرا...</span>'; }
+    function openEditModal(studentId){ let student=allStudents.find(s=>s.id===studentId); if(!student) return; document.getElementById('currentStudentName').textContent=student.studentName; document.getElementById('editStudentId').value=student.id; document.getElementById('currentEditMonth').value=currentMonth; document.getElementById('currentMonthIndicator').textContent=currentMonth==='all'?'جميع الشهور':`الشهر ${currentMonth}`; createEditFormContent(student,currentMonth); document.getElementById('editModal').style.display='block'; }
+    function createEditFormContent(student,month){ let container=document.getElementById('editFormContainer'); container.innerHTML=''; if(month==='all') for(let i=1;i<=3;i++) container.appendChild(createMonthSection(student,i)); else container.appendChild(createMonthSection(student,month)); }
+    function createMonthSection(student,m){ let section=document.createElement('div'); section.className='month-section'; let fields={1:['attendance1','oral1','homework1','written1'],2:['attendance2','oral2','homework2','written2'],3:['attendance3','homework3','oral3','written3']}; let labels={attendance1:'مواظبة1',oral1:'شفهي1',homework1:'واجبات1',written1:'تحريري1',attendance2:'مواظبة2',oral2:'شفهي2',homework2:'واجبات2',written2:'تحريري2',attendance3:'مواظبة3',homework3:'واجبات3',oral3:'شفهي3',written3:'تحريري3'}; let monthNames={1:'📘 الشهر الأول',2:'📗 الشهر الثاني',3:'📙 الشهر الثالث'}; let html=`<div class="month-title">${monthNames[m]}</div><div class="scores-grid">`; fields[m].forEach(f=>{ html+=`<div class="score-group"><label>${labels[f]}:</label><input type="number" id="edit${f}" min="0" max="5" step="0.1" value="${formatGrade(student[f])}" oninput="calculateMonthTotal(${m})"></div>`; }); let tot=calculateTotal(student,m); let res=calculateResult(tot); html+=`<div class="total-display"><span>المجموع: </span><span id="totalDisplay${m}">${tot}</span></div><div class="result-display"><span>المحصلة: </span><span id="resultDisplay${m}">${res}</span></div></div>`; section.innerHTML=html; return section; }
+    window.calculateMonthTotal=function(month){ let fields={1:['attendance1','oral1','homework1','written1'],2:['attendance2','oral2','homework2','written2'],3:['attendance3','homework3','oral3','written3']}; let total=0; fields[month].forEach(f=>{ let v=parseFloat(document.getElementById(`edit${f}`).value)||0; total+=v; }); let res=calculateResult(total); document.getElementById(`totalDisplay${month}`).textContent=total.toFixed(1); document.getElementById(`resultDisplay${month}`).textContent=res; };
+    function saveAllEdits(){ let id=document.getElementById('editStudentId').value, month=document.getElementById('currentEditMonth').value, student=allStudents.find(s=>s.id===id); if(!student) return; let changes=false, updates={ row:student.originalRowIndex, id:student.id }; let fieldsToCheck=[]; if(month==='all') fieldsToCheck=['attendance1','oral1','homework1','written1','attendance2','oral2','homework2','written2','attendance3','homework3','oral3','written3']; else { let mf={1:['attendance1','oral1','homework1','written1'],2:['attendance2','oral2','homework2','written2'],3:['attendance3','homework3','oral3','written3']}; fieldsToCheck=mf[month]; } fieldsToCheck.forEach(f=>{ let inp=document.getElementById(`edit${f}`); if(inp && student[f]!=inp.value){ student[f]=inp.value; updates[f]=inp.value; changes=true; } }); if(changes){ for(let i=1;i<=3;i++){ student[`total${i}`]=calculateTotal(student,i); student[`result${i}`]=calculateResult(student[`total${i}`]); } pendingUpdates=pendingUpdates.filter(u=>u.id!==student.id); pendingUpdates.push(updates); savePendingUpdates(); saveDataToLocalStorage(); updateDisplayedStudents(); closeModal('editModal'); showSuccess('تم حفظ التعديلات محلياً وجاهزة للمزامنة'); attemptAutoSync(); } else { closeModal('editModal'); showSuccess('لا توجد تعديلات جديدة'); } }
 
-  <!-- تحسين التنقل السلس بين الأقسام -->
-  <script>
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        
-        const targetId = this.getAttribute('href');
-        if (targetId === '#') return;
-        
-        const targetElement = document.querySelector(targetId);
-        if (targetElement) {
-          window.scrollTo({
-            top: targetElement.offsetTop - 80,
-            behavior: 'smooth'
-          });
+    // دوال التنقل وتسجيل الدخول
+    window.selectMonth=function(month){ currentMonth=month; document.querySelectorAll('.month-workspace').forEach(ws=>ws.classList.remove('active')); let id=month==='all'?'allMonthsWorkspace':`month${month}Workspace`; document.getElementById(id).classList.add('active'); monthSelectionSection.classList.add('hidden'); document.querySelectorAll('#currentTeacher1,#currentTeacher2,#currentTeacher3,#currentTeacherAll').forEach(el=>el.textContent=currentTeacherId); updateDisplayedStudents(); };
+    window.backToMonthSelection=function(){ document.querySelectorAll('.month-workspace').forEach(ws=>ws.classList.remove('active')); monthSelectionSection.classList.remove('hidden'); };
+    async function login(useLocal=false){ let tid=teacherIdInput.value.trim(); if(!tid) return alert('أدخل معرف المعلم'); if(useLocal){ let local=localStorage.getItem(LOCAL_STORAGE_KEY); if(local){ let parsed=JSON.parse(local); let filtered=parsed.students?.filter(s=>s.teacherId===tid); if(filtered?.length){ allStudents=filtered; currentTeacherId=tid; welcomeTeacherName.textContent=tid; populateClassFilters(); loginSection.classList.add('hidden'); monthSelectionSection.classList.remove('hidden'); showSuccess('تم التحميل من المحلي'); saveTeacherSession(tid); return; } } alert('لا توجد بيانات محلية'); } else { let ok=await fetchDataFromSheet(tid); if(ok){ saveTeacherSession(tid); } } }
+    async function initializeData(){ try{ let resp=await fetch(WEB_APP_URL); if(resp.ok) { loginBtn.disabled=false; connectionStatus.innerHTML='✅ الاتصال متاح'; } else throw new Error(); }catch(e){ loginBtn.disabled=true; connectionStatus.innerHTML='❌ فشل الاتصال'; } }
+    function handleLogout(){ clearTeacherSession(); allStudents=[]; pendingUpdates=[]; savePendingUpdates(); loginSection.classList.remove('hidden'); monthSelectionSection.classList.add('hidden'); document.querySelectorAll('.month-workspace').forEach(ws=>ws.classList.remove('active')); teacherIdInput.value=''; showSuccess('تم تسجيل الخروج'); }
+    function initializePWA(){ window.installButton=document.getElementById('installBtn'); if('serviceWorker' in navigator){ navigator.serviceWorker.register('/service-worker.js', { scope: '/' }).then(()=>pwaStatusDiv.textContent='✅ SW نشط').catch((err)=>pwaStatusDiv.textContent='❌ SW فشل: '+err); } window.addEventListener('beforeinstallprompt',(e)=>{ e.preventDefault(); deferredPrompt=e; installBtn.style.display='block'; }); installBtn.addEventListener('click',async()=>{ if(deferredPrompt){ deferredPrompt.prompt(); let {outcome}=await deferredPrompt.userChoice; if(outcome==='accepted') showSuccess('تم تثبيت التطبيق'); installBtn.style.display='none'; deferredPrompt=null; } }); if(window.matchMedia('(display-mode: standalone)').matches) installBtn.style.display='none'; }
+
+    // ربط الأحداث
+    document.addEventListener('DOMContentLoaded',()=>{
+        pendingUpdates=loadPendingUpdates(); updatePendingCount();
+        initializePWA(); initializeData(); startAutoSync();
+        loginBtn.addEventListener('click',()=>login(false)); useLocalDataBtn.addEventListener('click',()=>login(true)); retryBtn.addEventListener('click',initializeData);
+        document.querySelectorAll('[id^="logoutBtn"]').forEach(btn=>btn.addEventListener('click',handleLogout));
+        for(let i=1;i<=3;i++){ 
+            document.getElementById(`qrScanBtn${i}`)?.addEventListener('click',()=>startQRScanner(i));
+            document.getElementById(`exportExcelBtn${i}`)?.addEventListener('click',()=>exportToExcel(i));
+            document.getElementById(`importExcelBtn${i}`)?.addEventListener('click',()=>importExcel(i));
+            document.getElementById(`syncSheetsBtn${i}`)?.addEventListener('click',()=>syncPendingUpdates(false));
+            let search=document.getElementById(`searchNameInput${i}`); if(search) search.addEventListener('input',updateDisplayedStudents);
+            let filter=document.getElementById(`classNameFilter${i}`); if(filter) filter.addEventListener('change',updateDisplayedStudents);
         }
-      });
+        document.getElementById('qrScanBtnAll')?.addEventListener('click',()=>startQRScanner('all'));
+        document.getElementById('exportExcelBtnAll')?.addEventListener('click',()=>exportToExcel('all'));
+        document.getElementById('importExcelBtnAll')?.addEventListener('click',()=>importExcel('all'));
+        document.getElementById('syncSheetsBtnAll')?.addEventListener('click',()=>syncPendingUpdates(false));
+        document.getElementById('searchNameInputAll')?.addEventListener('input',updateDisplayedStudents);
+        document.getElementById('classNameFilterAll')?.addEventListener('change',updateDisplayedStudents);
+        document.getElementById('stopScannerBtn')?.addEventListener('click',stopQRScanner);
+        document.querySelectorAll('.month-card').forEach(card => { card.addEventListener('click', (e) => { let month = card.getAttribute('data-month'); if(month === '1') selectMonth(1); else if(month === '2') selectMonth(2); else if(month === '3') selectMonth(3); else if(month === 'all') selectMonth('all'); }); });
+        let session=loadTeacherSession(); if(session && session.teacherId){ teacherIdInput.value=session.teacherId; setTimeout(()=>login(false),500); }
     });
-  </script>
+</script>
 </body>
 </html>
