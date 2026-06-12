@@ -160,7 +160,7 @@
 
 <script>
     // ========== الإعدادات والمتغيرات العامة ==========
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz8nLHdRH-xevEpU4kZv83kmDFBZKCMDKNq0BRAmtsLaPaTgNDIX0LKeQNtDDEOuHfp/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwg6X6JGnthDBhPlugqH1WU44rUiQjIBYTD9Z3dH6_9AqKu_XNGxL8dhBF5mJeau8gC/exec';
     const LOCAL_STORAGE_KEY = 'studentsData';
     const PENDING_UPDATES_KEY = 'pendingUpdates';
     const TEACHER_SESSION_KEY = 'teacherSession';
@@ -215,34 +215,40 @@ async function syncPendingUpdates(isAuto = false) {
     }
     isSyncing = true;
     let updatesToSync = [...pendingUpdates];
-    updateDebugInfo(`محاولة مزامنة ${updatesToSync.length} تعديل...`);
+    updateDebugInfo(`بدء مزامنة ${updatesToSync.length} تعديل...`);
     try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 45000);
+        const formData = new FormData();
+        formData.append('data', JSON.stringify({ updates: updatesToSync, teacherId: currentTeacherId }));
+        
         const response = await fetch(WEB_APP_URL, {
             method: 'POST',
             mode: 'cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ updates: updatesToSync, teacherId: currentTeacherId }),
-            signal: controller.signal
+            body: formData
         });
-        clearTimeout(timeoutId);
-        const responseText = await response.text();
+        
+        const text = await response.text();
         let data;
-        try { data = JSON.parse(responseText); } catch(e) { throw new Error('استجابة غير JSON: ' + responseText.slice(0,200)); }
-        if(!response.ok) throw new Error(`HTTP ${response.status}: ${data.error || responseText}`);
+        try {
+            data = JSON.parse(text);
+        } catch(e) {
+            throw new Error('استجابة غير صالحة: ' + text.substring(0, 100));
+        }
+        
+        if(!response.ok) throw new Error(`HTTP ${response.status}: ${data.error || text}`);
+        
         if(data.status === 'success' && data.updatedCount > 0) {
-            // إزالة التعديلات التي تمت مزامنتها بنجاح
             pendingUpdates = pendingUpdates.filter(up => !updatesToSync.some(synced => synced.id === up.id && synced.row === up.row));
             savePendingUpdates();
-            showSuccess(`✅ تم مزامنة ${data.updatedCount} خلية`);
+            showSuccess(`✅ تمت مزامنة ${data.updatedCount} خلية بنجاح`);
             await fetchDataFromSheet(currentTeacherId, false);
+        } else if(data.status === 'success' && data.updatedCount === 0) {
+            showError('⚠️ لم يتم تحديث أي بيانات. تأكد من تطابق المعرفات.');
         } else {
-            throw new Error(data.error || 'فشلت المزامنة من السيرفر');
+            throw new Error(data.error || 'فشل المزامنة');
         }
-    } catch(err) {
-        updateDebugInfo(`❌ فشل المزامنة: ${err.message}`);
-        showError(`فشل المزامنة: ${err.message}. سيتم إعادة المحاولة تلقائياً.`);
+    } catch(error) {
+        updateDebugInfo(`فشل المزامنة: ${error.message}`);
+        showError(`فشل المزامنة: ${error.message}. سيتم إعادة المحاولة بعد دقيقة.`);
         if(syncRetryTimeout) clearTimeout(syncRetryTimeout);
         syncRetryTimeout = setTimeout(() => { if(navigator.onLine) syncPendingUpdates(true); }, 60000);
     } finally {
